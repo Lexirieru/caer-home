@@ -82,7 +82,7 @@
   justify-content: center;
   height: 100%;
   padding: 0 var(--pill-pad-x);
-  background: var(--pill-bg, #fff);
+  background: var(--pill-bg, transparent);
   color: var(--pill-text, var(--base, #000));
   text-decoration: none;
   border-radius: 9999px;
@@ -97,6 +97,11 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pill:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .pill .hover-circle {
@@ -214,7 +219,7 @@
   display: block;
   padding: 12px 16px;
   color: var(--pill-text, #fff);
-  background-color: var(--pill-bg, #fff);
+  background-color: var(--pill-bg, transparent);
   text-decoration: none;
   font-size: 16px;
   font-weight: 500;
@@ -224,7 +229,11 @@
 }
 
 .mobile-menu-popover .mobile-menu-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-menu-popover .mobile-menu-link:hover {
   cursor: pointer;
-  background-color: var(--base);
+  background-color: rgba(255, 255, 255, 0.2);
   color: var(--hover-text, #fff);
 }
