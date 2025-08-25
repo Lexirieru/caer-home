@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import LiquidChrome from "./components/LiquidChrome";
 import PillNav from "./components/PillNav";
 import { MorphingText } from "@/components/magicui/morphing-text";
-import OpeningScene from "./components/OpeningScene";
 
 
 export default function Home() {
-  const [showOpeningScene, setShowOpeningScene] = useState(true);
-
   // Mencegah text selection di seluruh halaman
   React.useEffect(() => {
     const preventSelection = (e: Event) => {
@@ -24,14 +21,6 @@ export default function Home() {
       document.removeEventListener('dragstart', preventSelection);
     };
   }, []);
-
-  const handleOpeningSceneComplete = () => {
-    setShowOpeningScene(false);
-  };
-
-  if (showOpeningScene) {
-    return <OpeningScene onComplete={handleOpeningSceneComplete} />;
-  }
 
   return (
     <div className="relative min-h-screen no-select bg-black">
@@ -51,6 +40,7 @@ export default function Home() {
         logoAlt="Caer Logo"
         items={[
           { label: 'Docs', href: '/docs' },
+          { label: 'Twitter', href: 'https://x.com/caerfinance' },
           { label: 'Waitlist', href: '/waitlist' }
         ]}
         activeHref="/"

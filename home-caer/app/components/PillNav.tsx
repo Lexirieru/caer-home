@@ -323,6 +323,8 @@ const PillNav: React.FC<PillNavProps> = ({
                   <a
                     role="menuitem"
                     href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`pill${activeHref === item.href ? " is-active" : ""}`}
                     aria-label={item.ariaLabel || item.label}
                     onMouseEnter={() => handleEnter(i)}
@@ -378,6 +380,8 @@ const PillNav: React.FC<PillNavProps> = ({
               ) : (
                 <a
                   href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`mobile-menu-link${activeHref === item.href ? " is-active" : ""}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
