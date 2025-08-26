@@ -90,4 +90,116 @@ body::before {
   z-index: -1;
 }
 
+/* Animasi sederhana untuk sheet */
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Class untuk animasi sheet */
+.sheet-slide-in {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.sheet-slide-out {
+  animation: slideOutToRight 0.2s ease-in;
+}
+
+.sheet-popup-in {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.sheet-popup-out {
+  animation: slideOutToRight 0.2s ease-in;
+}
+
+/* Memastikan background tetap konsisten saat sheet terbuka */
+[data-radix-sheet-overlay] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+
+[data-radix-sheet-content] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Memastikan LiquidChrome background tetap terlihat */
+[data-radix-sheet-overlay] + div {
+  background: transparent !important;
+}
+
+/* Override untuk memastikan tidak ada background yang berubah */
+body[data-radix-sheet-overlay] {
+  background: #0a0a0a !important;
+}
+
+html[data-radix-sheet-overlay] {
+  background: #0a0a0a !important;
+}
+
+/* Memastikan LiquidChrome tetap di background */
+div[style*="position: absolute"][style*="zIndex: 0"] {
+  z-index: 0 !important;
+  background: transparent !important;
+}
+
+/* Memastikan sheet tidak mengubah background utama */
+.relative.min-h-screen.no-select.bg-black {
+  background: #0a0a0a !important;
+  z-index: 1 !important;
+}
+
+/* Sheet content dengan z-index yang tepat */
+[data-radix-sheet-content] {
+  z-index: 50 !important;
+}
+
+/* Mencegah flash pada sheet */
+[data-radix-sheet-overlay] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+
+/* Optimasi untuk mencegah flash saat button click */
+button:focus {
+  outline: none !important;
+}
+
+/* Mencegah flash pada input */
+input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Mencegah konflik dengan sheet */
+[data-radix-sheet-content] ~ * {
+  will-change: auto !important;
+}
+
+/* Container untuk MorphingText */
+.morphing-text-container {
+  position: relative;
+  z-index: 10;
+}
+
 

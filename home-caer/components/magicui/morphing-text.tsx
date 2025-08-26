@@ -7,11 +7,13 @@ import { cn } from "@/lib/utils";
 const morphTime = 1.5;
 const cooldownTime = 1.0;
 
-const useMorphingText = (texts: string[]) => {
+const useMorphingText = (texts: string[], isPaused: boolean = false) => {
   const textIndexRef = useRef(0);
   const morphRef = useRef(0);
   const cooldownRef = useRef(0);
   const timeRef = useRef(new Date());
+  const isInitializedRef = useRef(false);
+  const animationRef = useRef<number | null>(null);
 
   const text1Ref = useRef<HTMLSpanElement>(null);
   const text2Ref = useRef<HTMLSpanElement>(null);
@@ -86,7 +88,7 @@ const useMorphingText = (texts: string[]) => {
   useEffect(() => {
     // Initialize text content and positioning
     const [current1, current2] = [text1Ref.current, text2Ref.current];
-    if (current1 && current2) {
+    if (current1 && current2 && !isInitializedRef.current) {
       current1.textContent = texts[0];
       current2.textContent = texts[1];
       
@@ -102,12 +104,16 @@ const useMorphingText = (texts: string[]) => {
       } else if (texts[1] === "Stay Liquid") {
         current2.style.transform = "translateX(0.15em)";
       }
+      
+      isInitializedRef.current = true;
     }
 
-    let animationFrameId: number;
+    let isActive = true;
 
     const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
+      if (!isActive || isPaused) return;
+      
+      animationRef.current = requestAnimationFrame(animate);
 
       const newTime = new Date();
       const dt = (newTime.getTime() - timeRef.current.getTime()) / 1000;
@@ -119,11 +125,17 @@ const useMorphingText = (texts: string[]) => {
       else doCooldown();
     };
 
+    // Start animation immediately but with better cleanup
     animate();
+
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      isActive = false;
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
     };
-  }, [doMorph, doCooldown, texts]);
+  }, [doMorph, doCooldown, texts, isPaused]);
 
   return { text1Ref, text2Ref };
 };
@@ -131,10 +143,16 @@ const useMorphingText = (texts: string[]) => {
 interface MorphingTextProps {
   className?: string;
   texts: string[];
+  isPaused?: boolean;
 }
 
-const Texts: React.FC<Pick<MorphingTextProps, "texts">> = ({ texts }) => {
-  const { text1Ref, text2Ref } = useMorphingText(texts);
+interface TextsProps {
+  texts: string[];
+  isPaused?: boolean;
+}
+
+const Texts: React.FC<TextsProps> = ({ texts, isPaused = false }) => {
+  const { text1Ref, text2Ref } = useMorphingText(texts, isPaused);
   
   // Calculate width based on longest text to prevent overflow
   const maxLength = Math.max(...texts.map(text => text.length));
@@ -178,6 +196,7 @@ const SvgFilters: React.FC = () => (
 export const MorphingText: React.FC<MorphingTextProps> = ({
   texts,
   className,
+  isPaused = false,
 }) => (
   <div
     className={cn(
@@ -185,7 +204,7 @@ export const MorphingText: React.FC<MorphingTextProps> = ({
       className,
     )}
   >
-    <Texts texts={texts} />
+    <Texts texts={texts} isPaused={isPaused} />
     <SvgFilters />
   </div>
 );
