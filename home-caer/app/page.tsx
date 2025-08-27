@@ -23,6 +23,10 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetAnimation, setSheetAnimation] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Prevent text selection across the entire page
   React.useEffect(() => {
@@ -45,6 +49,60 @@ export default function Home() {
       setSheetAnimation('sheet-popup-in');
     } else {
       setSheetAnimation('sheet-popup-out');
+    }
+  }, [isSheetOpen]);
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setErrorMessage('Please enter your email address');
+      setSubmitStatus('error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setEmail('');
+        // Close sheet after 2 seconds
+        setTimeout(() => {
+          setIsSheetOpen(false);
+          setSubmitStatus('idle');
+        }, 2000);
+      } else {
+        setErrorMessage(data.error || 'Something went wrong');
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      setErrorMessage('Network error. Please try again.');
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reset form when sheet opens
+  useEffect(() => {
+    if (isSheetOpen) {
+      setEmail('');
+      setSubmitStatus('idle');
+      setErrorMessage('');
     }
   }, [isSheetOpen]);
 
@@ -124,38 +182,69 @@ export default function Home() {
               <SheetContent className={`w-[400px] sm:w-[540px] bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl ${sheetAnimation}`}>
                 <SheetHeader className="sheet-content-animate">
                   <SheetTitle className="text-white font-neue-montreal text-2xl">
-                    Join Caer Waitlist
+                    {submitStatus === 'success' ? 'Welcome to Caer! 🚀' : 'Join Caer Waitlist'}
                   </SheetTitle>
                   <SheetDescription className="text-gray-200 font-neue-montreal">
-                    Be the first to know when Caer launches. Get early access to unified liquidity across all chains.
+                    {submitStatus === 'success' 
+                      ? 'You\'ve been added to the waitlist! Check your email for confirmation.'
+                      : 'Be the first to know when Caer launches. Get early access to unified liquidity across all chains.'
+                    }
                   </SheetDescription>
                 </SheetHeader>
-                <div className="grid flex-1 auto-rows-min gap-6 px-4 mt-8 sheet-content-animate-delay-1">
-                  <div className="grid gap-3">
-                    <Label htmlFor="email" className="text-white font-neue-montreal">
-                      Email Address
-                    </Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="Enter your email address"
-                      className="bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-gray-300 font-neue-montreal focus:border-white/40 focus:ring-white/20"
-                    />
+                
+                {submitStatus === 'success' ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">🎉</div>
+                      <p className="text-white font-neue-montreal text-lg">
+                        You're on the list!
+                      </p>
+                      <p className="text-gray-300 font-neue-montreal text-sm mt-2">
+                        We'll notify you when Caer launches.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="grid flex-1 auto-rows-min gap-6 px-4 mt-8 sheet-content-animate-delay-1">
+                    <div className="grid gap-3">
+                      <Label htmlFor="email" className="text-white font-neue-montreal">
+                        Email Address
+                      </Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email address"
+                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-gray-300 font-neue-montreal focus:border-white/40 focus:ring-white/20"
+                        disabled={isSubmitting}
+                      />
+                      {submitStatus === 'error' && (
+                        <p className="text-red-400 text-sm font-neue-montreal">
+                          {errorMessage}
+                        </p>
+                      )}
+                    </div>
+                  </form>
+                )}
+                
                 <SheetFooter className="mt-8 sheet-content-animate-delay-2">
-                  <Button 
-                    type="submit" 
-                    className="bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 font-neue-montreal w-full shadow-lg"
-                  >
-                    Join Waitlist
-                  </Button>
+                  {submitStatus !== 'success' && (
+                    <Button 
+                      type="submit" 
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 font-neue-montreal w-full shadow-lg disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+                    </Button>
+                  )}
                   <SheetClose asChild>
                     <Button 
                       variant="outline" 
                       className="bg-white/5 backdrop-blur-md border border-white/20 text-white hover:bg-white/10 font-neue-montreal w-full shadow-lg"
                     >
-                      Cancel
+                      {submitStatus === 'success' ? 'Close' : 'Cancel'}
                     </Button>
                   </SheetClose>
                 </SheetFooter>
